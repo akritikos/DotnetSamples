@@ -5,9 +5,10 @@ namespace Kritikos.Sample.HostedServices.Implementations
 	using System.Threading;
 	using System.Threading.Tasks;
 
+	using Kritikos.Sample.HostedServices.Abstractions;
 	using Microsoft.Extensions.Logging;
 
-	public class InMemoryBackgroundTaskQueue
+	public class InMemoryBackgroundTaskQueue : IInMemoryBackgroundTaskQueue
 	{
 		public InMemoryBackgroundTaskQueue(ILogger<InMemoryBackgroundTaskQueue> logger)
 			=> Logger = logger;
@@ -19,6 +20,9 @@ namespace Kritikos.Sample.HostedServices.Implementations
 
 		private SemaphoreSlim Signal { get; } = new SemaphoreSlim(0);
 
+		#region Implementation of IInMemoryBackgroundTaskQueue
+
+		/// <inheritdoc />
 		public void QueueBackgroundWorkItem(Func<CancellationToken, Task> workItem)
 		{
 			if (workItem == null)
@@ -30,9 +34,10 @@ namespace Kritikos.Sample.HostedServices.Implementations
 			Signal.Release();
 		}
 
-		public async Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellation)
+		/// <inheritdoc />
+		public async Task<Func<CancellationToken, Task>> DequeueAsync(CancellationToken cancellationToken)
 		{
-			await Signal.WaitAsync(cancellation);
+			await Signal.WaitAsync(cancellationToken);
 			var dequeued = WorkItems.TryDequeue(out var workItem);
 			if (!dequeued)
 			{
@@ -41,5 +46,7 @@ namespace Kritikos.Sample.HostedServices.Implementations
 
 			return workItem;
 		}
+
+		#endregion
 	}
 }
