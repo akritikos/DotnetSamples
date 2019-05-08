@@ -7,27 +7,22 @@ namespace Kritikos.Sample.HostedServices
 	using Kritikos.Sample.HostedServices.Abstractions;
 	using Microsoft.Extensions.DependencyInjection;
 	using Microsoft.Extensions.Hosting;
-	using Microsoft.Extensions.Logging;
+
+	using static Serilog.Log;
 
 	public class ConsumeScopedServiceHostedService : IHostedService
 	{
-		public ConsumeScopedServiceHostedService(ILogger<ConsumeScopedServiceHostedService> logger, IServiceProvider services)
-		{
-			Logger = logger;
-			Services = services;
-		}
+		public ConsumeScopedServiceHostedService(IServiceProvider services)
+			=> Services = services;
 
 		public IServiceProvider Services { get; }
-
-		private ILogger Logger { get; }
 
 		#region Implementation of IHostedService
 
 		/// <inheritdoc />
 		public Task StartAsync(CancellationToken cancellationToken)
 		{
-			Logger.LogInformation(
-				"Consume Scoped Service Hosted Service is starting.");
+			Logger.Verbose("Consume Scoped Service Hosted Service is starting.");
 
 			DoWork();
 
@@ -37,8 +32,7 @@ namespace Kritikos.Sample.HostedServices
 		/// <inheritdoc />
 		public Task StopAsync(CancellationToken cancellationToken)
 		{
-			Logger.LogInformation(
-				"Consume Scoped Service Hosted Service is stopping.");
+			Logger.Verbose("Consume Scoped Service Hosted Service is stopping.");
 
 			return Task.CompletedTask;
 		}
@@ -47,7 +41,7 @@ namespace Kritikos.Sample.HostedServices
 
 		private void DoWork()
 		{
-			Logger.LogInformation("Consume Scoped Service Hosted Service is working.");
+			Logger.Information("Consume Scoped Service Hosted Service is working.");
 
 			using var scope = Services.CreateScope();
 			var scopedProcessingService =

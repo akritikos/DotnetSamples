@@ -6,26 +6,22 @@ namespace Kritikos.Sample.HostedServices
 
 	using Kritikos.Sample.HostedServices.Abstractions;
 	using Microsoft.Extensions.Hosting;
-	using Microsoft.Extensions.Logging;
+
+	using static Serilog.Log;
 
 	public class InMemoryQueueService : BackgroundService
 	{
 		#region Overrides of BackgroundService
 
-		public InMemoryQueueService(ILogger<InMemoryQueueService> logger, IInMemoryBackgroundTaskQueue queue)
-		{
-			Logger = logger;
-			TaskQueue = queue;
-		}
-
-		private ILogger Logger { get; }
+		public InMemoryQueueService(IInMemoryBackgroundTaskQueue queue)
+			=> TaskQueue = queue;
 
 		private IInMemoryBackgroundTaskQueue TaskQueue { get; }
 
 		/// <inheritdoc />
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
-			Logger.LogDebug("Starting queue service");
+			Logger.Verbose("Starting up queue service");
 
 			while (!stoppingToken.IsCancellationRequested)
 			{
@@ -34,15 +30,15 @@ namespace Kritikos.Sample.HostedServices
 				try
 				{
 					await workItem(stoppingToken);
-					Logger.LogInformation("Sucessfully dequeued {workItem}", nameof(workItem));
+					Logger.Warning("Sucessfully dequeued {workItem}", nameof(workItem));
 				}
 				catch (Exception e)
 				{
-					Logger.LogError("Unexpected error {error} while dequeuing {workItem}", e, workItem);
+					Logger.Fatal("Unexpected error {error} while dequeuing {workItem}", e, workItem);
 				}
 			}
 
-			Logger.LogDebug("Stopping queue service");
+			Logger.Verbose("Stopping queue service");
 		}
 
 		#endregion

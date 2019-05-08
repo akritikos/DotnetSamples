@@ -6,23 +6,21 @@ namespace Kritikos.Sample.HostedServices
 
 	using Kritikos.Sample.HostedServices.Abstractions;
 	using Microsoft.Extensions.Hosting;
-	using Microsoft.Extensions.Logging;
+
+	using static Serilog.Log;
 
 	/// <summary>
 	/// Sample timer service that uses background queue.
 	/// </summary>
 	public class TimerService : IHostedService, IDisposable
 	{
-		public TimerService(ILogger<TimerService> logger, IInMemoryBackgroundTaskQueue queue)
+		public TimerService(IInMemoryBackgroundTaskQueue queue)
 		{
-			Logger = logger;
 			Queue = queue;
 			Trigger = new Timer(DoWork, null, Timeout.Infinite, 0);
 		}
 
 		private Timer Trigger { get; }
-
-		private ILogger Logger { get; }
 
 		private IInMemoryBackgroundTaskQueue Queue { get; }
 
@@ -31,7 +29,7 @@ namespace Kritikos.Sample.HostedServices
 		/// <inheritdoc />
 		public Task StartAsync(CancellationToken cancellationToken)
 		{
-			Logger.LogDebug("Starting timer service");
+			Logger.Verbose("Starting timer service");
 
 			Trigger.Change(TimeSpan.Zero, TimeSpan.FromSeconds(5));
 
@@ -41,7 +39,7 @@ namespace Kritikos.Sample.HostedServices
 		/// <inheritdoc />
 		public Task StopAsync(CancellationToken cancellationToken)
 		{
-			Logger.LogDebug("Stopping timer service");
+			Logger.Verbose("Stopping timer service");
 
 			Trigger.Change(Timeout.Infinite, 0);
 
@@ -60,7 +58,7 @@ namespace Kritikos.Sample.HostedServices
 
 		private void DoWork(object state)
 #pragma warning disable 1998 // Async is required by background queue
-			=> Queue.QueueBackgroundWorkItem(async (token) => Logger.LogInformation("Ticking..."));
+			=> Queue.QueueBackgroundWorkItem(async (token) => Logger.Information("Ticking..."));
 #pragma warning restore 1998
 	}
 }
