@@ -3,7 +3,7 @@ namespace Kritikos.Sample.HostedServices.Implementations
 	using Kritikos.Sample.HostedServices.Abstractions;
 	using Microsoft.Extensions.Logging;
 
-	internal class ScopedProcessingService : IScopedProcessingService
+	public class ScopedProcessingService : IScopedProcessingService
 	{
 		public ScopedProcessingService(ILogger<ScopedProcessingService> logger)
 			=> Logger = logger;
