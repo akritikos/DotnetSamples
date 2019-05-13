@@ -22,19 +22,12 @@ namespace Kritikos.Sample.HostedServices
 		/// <inheritdoc />
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
+			stoppingToken.Register(async () => await Shutdown());
 			await Client.SubscribeAsync("samples/queue");
 			Client.UseApplicationMessageReceivedHandler(ReceivedMessage);
 		}
 
 		#endregion
-
-		private async Task Shutdown()
-		{
-			await Client.UnsubscribeAsync("samples/queue");
-			await Client.StopAsync();
-
-			Client.Dispose();
-		}
 
 		private static void ReceivedMessage(MqttApplicationMessageReceivedEventArgs args)
 			=> Log.Information(
@@ -43,5 +36,13 @@ namespace Kritikos.Sample.HostedServices
 				args.DecodePayload(),
 				args.ApplicationMessage.Topic,
 				args.ClientId);
+
+		private async Task Shutdown()
+		{
+			await Client.UnsubscribeAsync("samples/queue");
+			await Client.StopAsync();
+
+			Client.Dispose();
+		}
 	}
 }
