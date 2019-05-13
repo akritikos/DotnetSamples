@@ -30,11 +30,11 @@ namespace Kritikos.Sample.HostedServices
 				try
 				{
 					await workItem(stoppingToken);
-					Logger.Warning("Sucessfully dequeued {workItem}", nameof(workItem));
+					Logger.Warning("Sucessfully dequeued {@workItem}", nameof(workItem));
 				}
 				catch (Exception e)
 				{
-					Logger.Fatal("Unexpected error {error} while dequeuing {workItem}", e, workItem);
+					Logger.Fatal("Unexpected error {@error} while dequeuing {@workItem}", e, workItem);
 				}
 			}
 
